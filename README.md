@@ -39,4 +39,5 @@ Consulta el archivo [REQUIREMENTS.md](REQUIREMENTS.md) para ver los detalles té
 
 ## ✒️ Autor
 
-* **Moisés González** - *Desarrollo Inicial*
+* **Moisés González** 
+* **José Miguel Parra Díaz** 
