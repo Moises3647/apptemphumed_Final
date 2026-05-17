@@ -3,15 +3,14 @@ package gonzalez.moises.apptemphumed.composables.stateflow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import gonzalez.moises.apptemphumed.composables.stateflow.DashboardScreen
-import gonzalez.moises.apptemphumed.composables.stateflow.HumidityScreen
-import gonzalez.moises.apptemphumed.composables.stateflow.TemperatureScreen
-import gonzalez.moises.apptemphumed.composables.stateflow.LoginScreen
+import gonzalez.moises.apptemphumed.ui.viewmodels.AeroStatViewModel
+import androidx.compose.runtime.getValue
 
 object AeroStatColors {
     val PrimaryBlue  = Color(0xFF1A6EDB)
@@ -46,33 +45,56 @@ object Routes {
 }
 
 @Composable
-fun AeroStatApp() {
+fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val navController = rememberNavController()
+
+    // 💎 Escuchamos de forma unificada los flujos de datos globales de la API
+    val realSensorData by viewModel.sensorState.collectAsState()
+    val realHistoryData by viewModel.historyState.collectAsState()
+
     AeroStatTheme {
         NavHost(navController = navController, startDestination = Routes.LOGIN) {
             composable(Routes.LOGIN) {
+                // 💎 Escuchamos el estado de autenticación en vivo
+                val authState by viewModel.authState.collectAsState()
+
                 LoginScreen(
-                    onLoginClick = { _, _ ->
-                        navController.navigate(Routes.DASHBOARD) {
-                            popUpTo(Routes.LOGIN) { inclusive = true }
+                    authState = authState, // 👈 Le pasamos el estado a la pantalla
+                    onLoginClick = { usuario, contrasena ->
+                        viewModel.loginUser(usuario, contrasena) {
+                            navController.navigate(Routes.DASHBOARD) {
+                                popUpTo(Routes.LOGIN) { inclusive = true }
+                            }
                         }
                     }
                 )
             }
+
             composable(Routes.DASHBOARD) {
                 DashboardScreen(
+                    sensorData = realSensorData, // Pasa el estado vivo al dashboard
                     onTemperatureClick = { navController.navigate(Routes.TEMPERATURE) },
                     onHumidityClick    = { navController.navigate(Routes.HUMIDITY) }
                 )
             }
+
             composable(Routes.TEMPERATURE) {
-                TemperatureScreen(onBack = { navController.popBackStack() },
+                // 💎 CORRECCIÓN: Inyectamos los parámetros obligatorios que ahora requiere TemperatureScreen
+                TemperatureScreen(
+                    sensorData = realSensorData,
+                    historyList = realHistoryData,
+                    onBack = { navController.popBackStack() },
                     onHumidityClick    = { navController.navigate(Routes.HUMIDITY) },
-                    onDashboardClick = {navController.navigate(Routes.DASHBOARD)}
+                    onDashboardClick = { navController.navigate(Routes.DASHBOARD) }
                 )
             }
+
             composable(Routes.HUMIDITY) {
-                HumidityScreen(onBack = { navController.popBackStack() },
+                // 💎 CORRECCIÓN: Inyectamos los parámetros obligatorios que ahora requiere HumidityScreen
+                HumidityScreen(
+                    sensorData = realSensorData,
+                    historyList = realHistoryData,
+                    onBack = { navController.popBackStack() },
                     onTemperatureClick = { navController.navigate(Routes.TEMPERATURE) },
                     onDashboardClick = { navController.navigate(Routes.DASHBOARD) }
                 )

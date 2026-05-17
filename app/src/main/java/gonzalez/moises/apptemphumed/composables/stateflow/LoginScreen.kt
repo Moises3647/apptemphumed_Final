@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gonzalez.moises.apptemphumed.ui.viewmodels.AuthState // Importante importar tu sealed class
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
 private val PrimaryBlue   = Color(0xFF1A6EDB)
@@ -38,16 +39,54 @@ private val TextPrimary   = Color(0xFF0D1B3E)
 private val TextSecondary = Color(0xFF8A9BB8)
 private val DividerColor  = Color(0xFFE0E8F5)
 
-// ─── LoginScreen ─────────────────────────────────────────────────────────────
+// ─── LoginScreen ACTUALIZADO ─────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    authState: AuthState, // 💎 Parámetro para escuchar el estado del ViewModel
     onLoginClick: (username: String, password: String) -> Unit = { _, _ -> },
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // Estados locales para controlar el cuadro de diálogo de error
+    var showDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    // LaunchedEffect reacciona cada vez que el authState cambie a Error
+    LaunchedEffect(authState) {
+        if (authState is AuthState.Error) {
+            errorMessage = authState.message
+            showDialog = true
+        }
+    }
+
+    // ── 📦 CUADRO DE DIÁLOGO (Message Box) ───────────────────────────────────
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(
+                    text = "Acceso Denegado",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFE53935) // Color rojo de alerta
+                )
+            },
+            text = {
+                Text(text = errorMessage, color = TextPrimary)
+            },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Aceptar", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = CardBg
+        )
+    }
+
+    // ── Cuerpo de la Interfaz ────────────────────────────────────────────────
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +114,7 @@ fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_upload_you_tube), // replace with cloud icon
+                    painter = painterResource(id = android.R.drawable.ic_menu_upload_you_tube),
                     contentDescription = "Logo",
                     tint = Color.White,
                     modifier = Modifier.size(36.dp)
@@ -153,7 +192,7 @@ fun LoginScreen(
                                 }
                             },
                             visualTransformation = if (passwordVisible) VisualTransformation.None
-                                                   else PasswordVisualTransformation(),
+                            else PasswordVisualTransformation(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -176,18 +215,23 @@ fun LoginScreen(
                         }
                     }
 
-                    // Login button
+                    // Login button con indicador de carga opcional
                     Button(
                         onClick = { onLoginClick(username, password) },
+                        enabled = authState !is AuthState.Loading, // Deshabilita el botón mientras carga
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
                     ) {
-                        Text("Login", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                        Spacer(Modifier.width(8.dp))
-                        Text("→", fontSize = 18.sp, color = Color.White)
+                        if (authState is AuthState.Loading) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                        } else {
+                            Text("Login", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                            Spacer(Modifier.width(8.dp))
+                            Text("→", fontSize = 18.sp, color = Color.White)
+                        }
                     }
                 }
             }
@@ -195,8 +239,9 @@ fun LoginScreen(
     }
 }
 
+// ─── Preview Actualizado ─────────────────────────────────────────────────────
 @Preview(showBackground = true, widthDp = 375, heightDp = 780)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen()
+    LoginScreen(authState = AuthState.Idle)
 }

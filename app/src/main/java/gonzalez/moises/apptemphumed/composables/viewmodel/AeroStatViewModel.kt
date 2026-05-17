@@ -10,16 +10,28 @@ import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+// Representa los estados del proceso de Login
+sealed class AuthState {
+    object Idle : AuthState()
+    object Loading : AuthState()
+    object Success : AuthState()
+    data class Error(val message: String) : AuthState()
+}
+
 class AeroStatViewModel : ViewModel() {
 
-    private val TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTgxMDUxMjIzOH0.YW7i9DszE45erlTEDDs-e8n-XpxRoT5gCqSRO0moA9M"
+    // Cambiado de constante fija a variable dinámica que iniciará vacía
+    private var tokenStorage: String? = null
 
-    // IMPORTANTE: Cambia 192.168.1.15 por la IP real de tu servidor FastAPI
     private val api = Retrofit.Builder()
         .baseUrl("https://apiproyectofinal-vbmk.onrender.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(AeroStatApiService::class.java)
+
+    // Estados de autenticación para la UI
+    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
+    val authState: StateFlow<AuthState> = _authState
 
     private val _sensorState = MutableStateFlow<SensorResponse?>(null)
     val sensorState: StateFlow<SensorResponse?> = _sensorState
@@ -30,18 +42,40 @@ class AeroStatViewModel : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing
 
-    init {
-        refreshData()
+    // Función para autenticarse y adquirir el token dinámico
+    fun loginUser(username: String, password: String, onSuccessNavigate: () -> Unit) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            try {
+                val response = api.login(username, password)
+
+                // Formateamos el token agregando el espacio del estándar Bearer
+                tokenStorage = "Bearer ${response.accessToken}"
+
+                _authState.value = AuthState.Success
+
+                // Disparamos la carga inicial de datos usando el nuevo token
+                refreshData()
+
+                // Ejecutamos la navegación hacia el Dashboard
+                onSuccessNavigate()
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error(e.localizedMessage ?: "Credenciales incorrectas")
+            }
+        }
     }
 
     fun refreshData() {
+        // Obtenemos el token guardado. Si no se ha iniciado sesión, no realiza la petición.
+        val currentToken = tokenStorage ?: return
+
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
-                _sensorState.value = api.getLatestData(TOKEN)
-                //_historyState.value = api.getHistory(20, TOKEN)
+                _sensorState.value = api.getLatestData(currentToken)
+                _historyState.value = api.getHistory(20, currentToken)
             } catch (e: Exception) {
-                // Aquí podrías manejar el error de conexión
+                // Manejo de errores de red o sesión expirada
             } finally {
                 _isRefreshing.value = false
             }
