@@ -12,11 +12,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class AeroStatViewModel : ViewModel() {
 
-    private val TOKEN = "Bearer token_super_seguro_para_la_app_y_raspberry"
+    private val TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTgxMDUxMjIzOH0.YW7i9DszE45erlTEDDs-e8n-XpxRoT5gCqSRO0moA9M"
 
     // IMPORTANTE: Cambia 192.168.1.15 por la IP real de tu servidor FastAPI
     private val api = Retrofit.Builder()
-        .baseUrl("http://192.168.1.15:8000/")
+        .baseUrl("https://apiproyectofinal-vbmk.onrender.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(AeroStatApiService::class.java)
@@ -39,7 +39,7 @@ class AeroStatViewModel : ViewModel() {
             _isRefreshing.value = true
             try {
                 _sensorState.value = api.getLatestData(TOKEN)
-                _historyState.value = api.getHistory(20, TOKEN)
+                //_historyState.value = api.getHistory(20, TOKEN)
             } catch (e: Exception) {
                 // Aquí podrías manejar el error de conexión
             } finally {

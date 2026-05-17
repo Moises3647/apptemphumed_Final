@@ -1,4 +1,5 @@
 package gonzalez.moises.apptemphumed.composables.stateflow
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,26 +19,33 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// If using Coil for image loading:
-// import coil.compose.AsyncImage
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import gonzalez.moises.apptemphumed.ui.viewmodels.AeroStatViewModel
 
 // ─── Colors ──────────────────────────────────────────────────────────────────
-private val PrimaryBlue    = Color(0xFF1A6EDB)
-private val LightBlue      = Color(0xFFB8D0F5)
-private val PageBg         = Color(0xFFE8EFFE)
-private val CardBg         = Color(0xFFFFFFFF)
-private val TextPrimary    = Color(0xFF0D1B3E)
-private val TextSecondary  = Color(0xFF8A9BB8)
-private val ChipBlue       = Color(0xFFE8F0FE)
-private val BarBgColor     = Color(0xFFD0DCEF)
+private val PrimaryBlue = Color(0xFF1A6EDB)
+private val LightBlue = Color(0xFFB8D0F5)
+private val PageBg = Color(0xFFE8EFFE)
+private val CardBg = Color(0xFFFFFFFF)
+private val TextPrimary = Color(0xFF0D1B3E)
+private val TextSecondary = Color(0xFF8A9BB8)
+private val ChipBlue = Color(0xFFE8F0FE)
+private val BarBgColor = Color(0xFFD0DCEF)
 
 // ─── Bar chart data ───────────────────────────────────────────────────────────
-data class TrendBar(val hour: String, val tempFraction: Float, val humFraction: Float, val isNow: Boolean = false)
+data class TrendBar(
+    val hour: String,
+    val tempFraction: Float,
+    val humFraction: Float,
+    val isNow: Boolean = false
+)
 
 private val trendData = listOf(
     TrendBar("09:00", 0.55f, 0.80f),
@@ -54,15 +62,19 @@ private val trendData = listOf(
 fun DashboardScreen(
     onTemperatureClick: () -> Unit = {},
     onHumidityClick: () -> Unit = {},
-
 ) {
+
+    val viewModel: AeroStatViewModel = viewModel()
+
+    val sensorData by viewModel.sensorState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.AccountCircle, // replace with cloud vector
+                            imageVector = Icons.Default.AccountCircle,
                             contentDescription = "Logo",
                             tint = PrimaryBlue,
                             modifier = Modifier.size(26.dp)
@@ -82,6 +94,7 @@ fun DashboardScreen(
         containerColor = PageBg,
         bottomBar = { DashboardBottomBar(onTemperatureClick, onHumidityClick) }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,6 +103,7 @@ fun DashboardScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Spacer(Modifier.height(8.dp))
 
             // ── Metric cards row ───────────────────────────────────────────────
@@ -97,18 +111,20 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+
                 MetricCard(
                     modifier = Modifier.weight(1f),
                     iconEmoji = "🌡",
                     label = "TEMPERATURA",
-                    value = "24°C",
+                    value = "${sensorData?.temperatura ?: "--"}°C",
                     onClick = onTemperatureClick
                 )
+
                 MetricCard(
                     modifier = Modifier.weight(1f),
                     iconEmoji = "💧",
                     label = "HUMEDAD",
-                    value = "60%",
+                    value = "${sensorData?.humedad ?: "--"}%",
                     onClick = onHumidityClick
                 )
             }
@@ -120,42 +136,23 @@ fun DashboardScreen(
                 colors = CardDefaults.cardColors(containerColor = CardBg),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
+
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    // Nature image placeholder
-                    // Replace Box below with:
-                    // AsyncImage(model = "your_image_url", ...)
-                    Box(
+
+                    AsyncImage(
+                        model = sensorData?.foto_path,
+                        contentDescription = "Imagen del sensor",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
-                            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(
-                                        Color(0xFFB8E0A0),
-                                        Color(0xFF87CEEB),
-                                        Color(0xFFFFD700).copy(alpha = 0.6f)
-                                    ),
-                                    start = Offset(0f, 200f),
-                                    end = Offset(400f, 0f)
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 20.dp,
+                                    topEnd = 20.dp
                                 )
                             ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Tree silhouette drawn with Canvas
-                        Canvas(modifier = Modifier.fillMaxSize()) {
-                            drawTreeSilhouette()
-                        }
-                        // Label overlay for image placeholder
-                        Text(
-                            "[ Imagen de naturaleza ]",
-                            color = Color.White.copy(alpha = 0.6f),
-                            fontSize = 12.sp,
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(bottom = 8.dp)
-                        )
-                    }
+                        contentScale = ContentScale.Crop
+                    )
 
                     Column(
                         modifier = Modifier
@@ -163,16 +160,19 @@ fun DashboardScreen(
                             .padding(vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+
                         Text(
-                            "Martes, 24 Octubre",
+                            sensorData?.timestamp ?: "Sin fecha",
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary,
                             textAlign = TextAlign.Center
                         )
+
                         Spacer(Modifier.height(4.dp))
+
                         Text(
-                            "14:45 PM",
+                            "Datos obtenidos desde la API",
                             fontSize = 15.sp,
                             color = TextSecondary,
                             textAlign = TextAlign.Center
@@ -188,20 +188,25 @@ fun DashboardScreen(
                 colors = CardDefaults.cardColors(containerColor = CardBg),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
+
                 Column(modifier = Modifier.padding(16.dp)) {
+
                     // Header
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         Column {
+
                             Text(
                                 "Tendencia Diaria",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
                                 color = TextPrimary
                             )
+
                             Text(
                                 "ÚLTIMAS 6 HORAS",
                                 fontSize = 11.sp,
@@ -209,9 +214,13 @@ fun DashboardScreen(
                                 letterSpacing = 1.sp
                             )
                         }
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
+
                             LegendDot(color = PrimaryBlue, label = "Temp")
+
                             Spacer(Modifier.width(8.dp))
+
                             LegendDot(color = LightBlue, label = "Hum")
                         }
                     }
@@ -226,6 +235,7 @@ fun DashboardScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
+
                         trendData.forEach { bar ->
                             TrendBarColumn(bar = bar)
                         }
@@ -240,14 +250,18 @@ fun DashboardScreen(
                 colors = CardDefaults.cardColors(containerColor = CardBg),
                 elevation = CardDefaults.cardElevation(2.dp)
             ) {
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     Text("↻", fontSize = 18.sp, color = TextSecondary)
+
                     Spacer(Modifier.width(10.dp))
+
                     Text(
                         "Actualizando datos...",
                         fontSize = 14.sp,
@@ -271,6 +285,7 @@ private fun MetricCard(
     value: String,
     onClick: () -> Unit
 ) {
+
     Card(
         modifier = modifier,
         onClick = onClick,
@@ -278,6 +293,7 @@ private fun MetricCard(
         colors = CardDefaults.cardColors(containerColor = CardBg),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -285,7 +301,9 @@ private fun MetricCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
+
             Text(iconEmoji, fontSize = 28.sp)
+
             Text(
                 label,
                 fontSize = 10.sp,
@@ -293,6 +311,7 @@ private fun MetricCard(
                 letterSpacing = 1.sp,
                 textAlign = TextAlign.Center
             )
+
             Text(
                 value,
                 fontSize = 28.sp,
@@ -307,14 +326,18 @@ private fun MetricCard(
 // ─── Legend dot ──────────────────────────────────────────────────────────────
 @Composable
 private fun LegendDot(color: Color, label: String) {
+
     Row(verticalAlignment = Alignment.CenterVertically) {
+
         Box(
             modifier = Modifier
                 .size(8.dp)
                 .clip(CircleShape)
                 .background(color)
         )
+
         Spacer(Modifier.width(4.dp))
+
         Text(label, fontSize = 12.sp, color = TextSecondary)
     }
 }
@@ -322,6 +345,7 @@ private fun LegendDot(color: Color, label: String) {
 // ─── Trend bar column ────────────────────────────────────────────────────────
 @Composable
 private fun TrendBarColumn(bar: TrendBar) {
+
     val maxBarHeight = 130.dp
 
     Column(
@@ -329,12 +353,14 @@ private fun TrendBarColumn(bar: TrendBar) {
         verticalArrangement = Arrangement.Bottom,
         modifier = Modifier.width(40.dp)
     ) {
+
         Box(
             modifier = Modifier
                 .width(28.dp)
                 .height(maxBarHeight),
             contentAlignment = Alignment.BottomCenter
         ) {
+
             // Background track
             Box(
                 modifier = Modifier
@@ -343,7 +369,8 @@ private fun TrendBarColumn(bar: TrendBar) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(BarBgColor)
             )
-            // Humidity bar (lighter, behind)
+
+            // Humidity bar
             Box(
                 modifier = Modifier
                     .width(28.dp)
@@ -351,7 +378,8 @@ private fun TrendBarColumn(bar: TrendBar) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(LightBlue)
             )
-            // Temperature bar (solid blue, front)
+
+            // Temperature bar
             Box(
                 modifier = Modifier
                     .width(28.dp)
@@ -360,7 +388,9 @@ private fun TrendBarColumn(bar: TrendBar) {
                     .background(PrimaryBlue)
             )
         }
+
         Spacer(Modifier.height(6.dp))
+
         Text(
             text = bar.hour,
             fontSize = if (bar.isNow) 11.sp else 10.sp,
@@ -373,13 +403,16 @@ private fun TrendBarColumn(bar: TrendBar) {
 
 // ─── Tree silhouette (Canvas) ─────────────────────────────────────────────────
 private fun DrawScope.drawTreeSilhouette() {
+
     val cx = size.width / 2
     val cy = size.height / 2
 
-    // Sun glow
     drawCircle(
         brush = Brush.radialGradient(
-            colors = listOf(Color(0xFFFFD700).copy(alpha = 0.6f), Color.Transparent),
+            colors = listOf(
+                Color(0xFFFFD700).copy(alpha = 0.6f),
+                Color.Transparent
+            ),
             center = Offset(cx * 0.3f, cy * 0.4f),
             radius = size.width * 0.35f
         ),
@@ -387,10 +420,12 @@ private fun DrawScope.drawTreeSilhouette() {
         center = Offset(cx * 0.3f, cy * 0.4f)
     )
 
-    // Ground
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFF5A8A3A).copy(alpha = 0.7f), Color(0xFF3A6A1A).copy(alpha = 0.9f)),
+            colors = listOf(
+                Color(0xFF5A8A3A).copy(alpha = 0.7f),
+                Color(0xFF3A6A1A).copy(alpha = 0.9f)
+            ),
             startY = size.height * 0.75f,
             endY = size.height
         ),
@@ -398,7 +433,6 @@ private fun DrawScope.drawTreeSilhouette() {
         size = Size(size.width, size.height * 0.22f)
     )
 
-    // Trunk
     drawRoundRect(
         color = Color(0xFF5C3A1E),
         topLeft = Offset(cx - 12f, size.height * 0.6f),
@@ -406,26 +440,10 @@ private fun DrawScope.drawTreeSilhouette() {
         cornerRadius = CornerRadius(4f)
     )
 
-    // Canopy layers
     drawCircle(
         color = Color(0xFF2D6A2D).copy(alpha = 0.9f),
         radius = size.width * 0.22f,
         center = Offset(cx, size.height * 0.42f)
-    )
-    drawCircle(
-        color = Color(0xFF3A8A3A).copy(alpha = 0.85f),
-        radius = size.width * 0.18f,
-        center = Offset(cx - 30f, size.height * 0.38f)
-    )
-    drawCircle(
-        color = Color(0xFF4A9A2A).copy(alpha = 0.8f),
-        radius = size.width * 0.15f,
-        center = Offset(cx + 35f, size.height * 0.40f)
-    )
-    drawCircle(
-        color = Color(0xFF5AAA2A).copy(alpha = 0.75f),
-        radius = size.width * 0.12f,
-        center = Offset(cx, size.height * 0.28f)
     )
 }
 
@@ -434,12 +452,13 @@ private fun DrawScope.drawTreeSilhouette() {
 fun DashboardBottomBar(
     onTemperatureClick: () -> Unit,
     onHumidityClick: () -> Unit
-
 ) {
+
     NavigationBar(
         containerColor = CardBg,
         tonalElevation = 8.dp
     ) {
+
         NavigationBarItem(
             selected = true,
             onClick = { },
@@ -453,17 +472,31 @@ fun DashboardBottomBar(
                 )
             }
         )
+
         NavigationBarItem(
             selected = false,
             onClick = onTemperatureClick,
             icon = { Text("🌡", fontSize = 22.sp) },
-            label = { Text("TEMPERATURE", fontSize = 9.sp, color = TextSecondary) }
+            label = {
+                Text(
+                    "TEMPERATURE",
+                    fontSize = 9.sp,
+                    color = TextSecondary
+                )
+            }
         )
+
         NavigationBarItem(
             selected = false,
             onClick = onHumidityClick,
             icon = { Text("💧", fontSize = 22.sp) },
-            label = { Text("HUMIDITY", fontSize = 9.sp, color = TextSecondary) }
+            label = {
+                Text(
+                    "HUMIDITY",
+                    fontSize = 9.sp,
+                    color = TextSecondary
+                )
+            }
         )
     }
 }
