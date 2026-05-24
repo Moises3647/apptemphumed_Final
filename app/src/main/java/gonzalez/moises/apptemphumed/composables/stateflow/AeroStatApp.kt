@@ -3,6 +3,7 @@ package gonzalez.moises.apptemphumed.composables.stateflow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -91,6 +92,11 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
             }
 
             composable(Routes.DASHBOARD) {
+                // Lanzará la petición en cuanto el usuario entre al Dashboard
+                LaunchedEffect(Unit) {
+                    viewModel.refreshData()
+                }
+
                 DashboardScreen(
                     sensorData = realSensorData,
                     onTemperatureClick = { navController.navigate(Routes.TEMPERATURE) },
@@ -99,6 +105,11 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
             }
 
             composable(Routes.TEMPERATURE) {
+                // Lanzará la petición en cuanto cambie a la pantalla de Temperatura
+                LaunchedEffect(Unit) {
+                    viewModel.refreshData()
+                }
+
                 TemperatureScreen(
                     sensorData = realSensorData,
                     historyList = realHistoryData,
@@ -109,6 +120,11 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
             }
 
             composable(Routes.HUMIDITY) {
+                // Lanzará la petición en cuanto cambie a la pantalla de Humedad
+                LaunchedEffect(Unit) {
+                    viewModel.refreshData()
+                }
+
                 HumidityScreen(
                     sensorData = realSensorData,
                     historyList = realHistoryData,
