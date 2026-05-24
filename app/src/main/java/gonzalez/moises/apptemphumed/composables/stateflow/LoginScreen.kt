@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gonzalez.moises.apptemphumed.R
 import gonzalez.moises.apptemphumed.ui.viewmodels.AuthState
 
 private val PrimaryBlue   = Color(0xFF1A6EDB)
@@ -99,20 +100,12 @@ fun LoginScreen(
 
             Spacer(Modifier.height(60.dp))
 
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(PrimaryBlue),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_upload_you_tube),
-                    contentDescription = "Logo",
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
+            Icon(
+                painter = painterResource(id = R.drawable.iconoaerostat),
+                contentDescription = "Logo",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(120.dp)
+            )
 
             Spacer(Modifier.height(16.dp))
 
@@ -122,6 +115,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
+
             Text(
                 text = "Precisión e Inteligencia Atmosférica",
                 fontSize = 13.sp,
@@ -143,14 +137,32 @@ fun LoginScreen(
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
+
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Nombre de usuario", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+
+                        Text(
+                            "Nombre de usuario",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary
+                        )
+
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
-                            placeholder = { Text("Introduce tu nombre de usuario", color = TextSecondary, fontSize = 14.sp) },
+                            placeholder = {
+                                Text(
+                                    "Introduce tu nombre de usuario",
+                                    color = TextSecondary,
+                                    fontSize = 14.sp
+                                )
+                            },
                             leadingIcon = {
-                                Icon(Icons.Default.Person, contentDescription = null, tint = TextSecondary)
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = null,
+                                    tint = TextSecondary
+                                )
                             },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
@@ -165,25 +177,43 @@ fun LoginScreen(
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text("Contraseña", fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary)
+
+                        Text(
+                            "Contraseña",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextPrimary
+                        )
+
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
                             leadingIcon = {
-                                Icon(Icons.Default.Lock, contentDescription = null, tint = TextSecondary)
+                                Icon(
+                                    Icons.Default.Lock,
+                                    contentDescription = null,
+                                    tint = TextSecondary
+                                )
                             },
                             trailingIcon = {
                                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                     Icon(
-                                        if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                        if (passwordVisible)
+                                            Icons.Default.VisibilityOff
+                                        else
+                                            Icons.Default.Visibility,
                                         contentDescription = null,
                                         tint = TextSecondary
                                     )
                                 }
                             },
-                            visualTransformation = if (passwordVisible) VisualTransformation.None
-                            else PasswordVisualTransformation(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                            visualTransformation = if (passwordVisible)
+                                VisualTransformation.None
+                            else
+                                PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password
+                            ),
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
@@ -194,17 +224,18 @@ fun LoginScreen(
                             ),
                             singleLine = true
                         )
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End // Lo alinea a la derecha
+                            horizontalArrangement = Arrangement.End
                         ) {
                             Text(
-                                text = "Crear nuevo usuario", // Cambiamos el texto de Forgot Password
-                                color = Color(0xFF1A6EDB), // El azul primario de tu App (PrimaryBlue)
+                                text = "Crear nuevo usuario",
+                                color = PrimaryBlue,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.clickable {
-                                    onNavigateToRegister() // <-- Llama a la navegación que agregamos al NavHost
+                                    onNavigateToRegister()
                                 }
                             )
                         }
@@ -217,14 +248,34 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(52.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PrimaryBlue
+                        )
                     ) {
+
                         if (authState is AuthState.Loading) {
-                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+
                         } else {
-                            Text("Iniciar Sesión", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+
+                            Text(
+                                "Iniciar Sesión",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+
                             Spacer(Modifier.width(8.dp))
-                            Text("→", fontSize = 18.sp, color = Color.White)
+
+                            Text(
+                                "→",
+                                fontSize = 18.sp,
+                                color = Color.White
+                            )
                         }
                     }
                 }
@@ -233,3 +284,11 @@ fun LoginScreen(
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(
+        authState = AuthState.Idle,
+        onNavigateToRegister = {}
+    )
+}
