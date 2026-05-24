@@ -33,8 +33,8 @@ private val ChipBlue      = Color(0xFFE8F0FE)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemperatureScreen(
-    sensorData: SensorResponse?,          // 💎 Dato actual de la API
-    historyList: List<HistoryPoint>,      // 💎 Historial real de la API
+    sensorData: SensorResponse?,
+    historyList: List<HistoryPoint>,
     onBack: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
     onHumidityClick: () -> Unit = {}
@@ -43,7 +43,7 @@ fun TemperatureScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Temperature", color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                    Text("Temperatura", color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -67,11 +67,10 @@ fun TemperatureScreen(
             Spacer(Modifier.height(4.dp))
 
             Column {
-                Text("HISTORICAL DATA", fontSize = 11.sp, color = TextSecondary, letterSpacing = 1.5.sp)
-                Text("Temperature Analysis", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("HISTORIAL DE DATOS", fontSize = 11.sp, color = TextSecondary, letterSpacing = 1.5.sp)
+                Text("Análisis de Temperatura", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
 
-            // ── Chart ────────────────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -84,7 +83,7 @@ fun TemperatureScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("24h Temperature", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+                        Text("Temperatura 24h", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(PrimaryBlue))
                             Spacer(Modifier.width(4.dp))
@@ -101,7 +100,6 @@ fun TemperatureScreen(
                 }
             }
 
-            // ── Recent Readings ───────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -109,7 +107,7 @@ fun TemperatureScreen(
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Recent Readings", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+                    Text("Lecturas Recientes", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
                     Spacer(Modifier.height(12.dp))
 
                     if (historyList.isEmpty()) {
@@ -140,17 +138,16 @@ fun TemperatureScreen(
                 }
             }
 
-            // ── Current Reading ───────────────────────────────────────────────
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(PrimaryBlue).padding(20.dp)
             ) {
                 Column {
-                    Text("CURRENT READING", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), letterSpacing = 1.sp)
+                    Text("LECTURA ACTUAL", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), letterSpacing = 1.sp)
                     Spacer(Modifier.height(4.dp))
                     Text(if (sensorData != null) "${sensorData.temperatura}°C" else "--°C", fontSize = 56.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Current thermal tracking context acquired securely through Render OAuth2 JSON Web Tokens protocols.",
+                        "Los datos que se muestran arriba corresponden a los valores exactos de temperatura relativa transmitidos por los conjuntos de sensores de tu Raspberry Pi 2.",
                         color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp, lineHeight = 18.sp
                     )
                 }
@@ -185,8 +182,8 @@ private fun TemperatureLineChart(modifier: Modifier = Modifier, dataPoints: List
 private fun TemperatureBottomBar(onDashboardClick: () -> Unit, onHumidityClick: () -> Unit) {
     NavigationBar(containerColor = CardBg, tonalElevation = 8.dp) {
         NavigationBarItem(selected = false, onClick = onDashboardClick, icon = { Text("⊞", fontSize = 22.sp) }, label = { Text("DASHBOARD", fontSize = 9.sp) })
-        NavigationBarItem(selected = true, onClick = {}, icon = { Text("🌡", fontSize = 22.sp) }, label = { Text("TEMPERATURE", fontSize = 9.sp, color = PrimaryBlue, fontWeight = FontWeight.Bold) })
-        NavigationBarItem(selected = false, onClick = onHumidityClick, icon = { Text("💧", fontSize = 22.sp) }, label = { Text("HUMIDITY", fontSize = 9.sp) })
+        NavigationBarItem(selected = true, onClick = {}, icon = { Text("🌡", fontSize = 22.sp) }, label = { Text("TEMPERATURA", fontSize = 9.sp, color = PrimaryBlue, fontWeight = FontWeight.Bold) })
+        NavigationBarItem(selected = false, onClick = onHumidityClick, icon = { Text("💧", fontSize = 22.sp) }, label = { Text("HUMEDAD", fontSize = 9.sp) })
     }
 }
 

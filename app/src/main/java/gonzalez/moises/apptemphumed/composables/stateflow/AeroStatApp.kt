@@ -47,19 +47,16 @@ object Routes {
 @Composable
 fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val navController = rememberNavController()
-
-    // 💎 Escuchamos de forma unificada los flujos de datos globales de la API
     val realSensorData by viewModel.sensorState.collectAsState()
     val realHistoryData by viewModel.historyState.collectAsState()
 
     AeroStatTheme {
         NavHost(navController = navController, startDestination = Routes.LOGIN) {
             composable(Routes.LOGIN) {
-                // 💎 Escuchamos el estado de autenticación en vivo
                 val authState by viewModel.authState.collectAsState()
 
                 LoginScreen(
-                    authState = authState, // 👈 Le pasamos el estado a la pantalla
+                    authState = authState,
                     onLoginClick = { usuario, contrasena ->
                         viewModel.loginUser(usuario, contrasena) {
                             navController.navigate(Routes.DASHBOARD) {
@@ -72,14 +69,13 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
 
             composable(Routes.DASHBOARD) {
                 DashboardScreen(
-                    sensorData = realSensorData, // Pasa el estado vivo al dashboard
+                    sensorData = realSensorData,
                     onTemperatureClick = { navController.navigate(Routes.TEMPERATURE) },
                     onHumidityClick    = { navController.navigate(Routes.HUMIDITY) }
                 )
             }
 
             composable(Routes.TEMPERATURE) {
-                // 💎 CORRECCIÓN: Inyectamos los parámetros obligatorios que ahora requiere TemperatureScreen
                 TemperatureScreen(
                     sensorData = realSensorData,
                     historyList = realHistoryData,
@@ -90,7 +86,6 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
             }
 
             composable(Routes.HUMIDITY) {
-                // 💎 CORRECCIÓN: Inyectamos los parámetros obligatorios que ahora requiere HumidityScreen
                 HumidityScreen(
                     sensorData = realSensorData,
                     historyList = realHistoryData,

@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import gonzalez.moises.apptemphumed.data.models.HistoryPoint
 import gonzalez.moises.apptemphumed.data.models.SensorResponse
 
-// ─── Colors ──────────────────────────────────────────────────────────────────
 private val PrimaryBlue   = Color(0xFF1A6EDB)
 private val PageBg        = Color(0xFFF0F5FF)
 private val CardBg        = Color(0xFFFFFFFF)
@@ -34,12 +33,11 @@ private val TextPrimary   = Color(0xFF0D1B3E)
 private val TextSecondary = Color(0xFF8A9BB8)
 private val ChipBlue      = Color(0xFFE8F0FE)
 
-// ─── HumidityScreen CORREGIDO ────────────────────────────────────────────────
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HumidityScreen(
-    sensorData: SensorResponse?,          // 💎 Dato actual de la API
-    historyList: List<HistoryPoint>,      // 💎 Historial real de la API
+    sensorData: SensorResponse?,
+    historyList: List<HistoryPoint>,
     onBack: () -> Unit = {},
     onTemperatureClick: () -> Unit = {},
     onDashboardClick: () -> Unit = {},
@@ -48,7 +46,7 @@ fun HumidityScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Humidity", color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                    Text("Humedad", color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -71,13 +69,11 @@ fun HumidityScreen(
         ) {
             Spacer(Modifier.height(4.dp))
 
-            // ── Header ────────────────────────────────────────────────────────
             Column {
-                Text("HISTORICAL DATA", fontSize = 11.sp, color = TextSecondary, letterSpacing = 1.5.sp)
-                Text("Humidity Analysis", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text("HISTORIAL DE DATOS", fontSize = 11.sp, color = TextSecondary, letterSpacing = 1.5.sp)
+                Text("Análisis de Humedad", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
 
-            // ── 24h Chart ────────────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -90,16 +86,14 @@ fun HumidityScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Relative Humidity", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
+                        Text("Humedad Relativa", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextPrimary)
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(PrimaryBlue))
                             Spacer(Modifier.width(4.dp))
-                            Text("Percentage (%)", fontSize = 11.sp, color = TextSecondary)
+                            Text("Porcentaje (%)", fontSize = 11.sp, color = TextSecondary)
                         }
                     }
                     Spacer(Modifier.height(12.dp))
-
-                    // Si hay puntos históricos, pasamos sus valores para graficarlos en vivo
                     val points = historyList.map { it.humedad.toFloat() }.reversed()
                     HumidityLineChart(
                         modifier = Modifier.fillMaxWidth().height(140.dp),
@@ -108,7 +102,6 @@ fun HumidityScreen(
                 }
             }
 
-            // ── Recent Readings ───────────────────────────────────────────────
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -116,7 +109,7 @@ fun HumidityScreen(
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Recent Readings", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
+                    Text("Lecturas Recientes", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = TextPrimary)
                     Spacer(Modifier.height(12.dp))
 
                     if (historyList.isEmpty()) {
@@ -147,17 +140,16 @@ fun HumidityScreen(
                 }
             }
 
-            // ── Current Reading ───────────────────────────────────────────────
             Box(
                 modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(PrimaryBlue).padding(20.dp)
             ) {
                 Column {
-                    Text("CURRENT READING", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), letterSpacing = 1.sp)
+                    Text("LECTURA ACTUAL", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), letterSpacing = 1.sp)
                     Spacer(Modifier.height(4.dp))
                     Text(if (sensorData != null) "${sensorData.humedad}%" else "--%", fontSize = 56.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "The data displayed above represents the exact relative moisture telemetry pushed by your Raspberry Pi 2 sensor arrays.",
+                        "Los datos que se muestran arriba corresponden a los valores exactos de humedad relativa transmitidos por los conjuntos de sensores de tu Raspberry Pi 2.",
                         color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp, lineHeight = 18.sp
                     )
                 }
@@ -192,8 +184,8 @@ private fun HumidityLineChart(modifier: Modifier = Modifier, dataPoints: List<Fl
 private fun HumidityBottomBar(onDashboardClick: () -> Unit, onTemperatureClick: () -> Unit) {
     NavigationBar(containerColor = CardBg, tonalElevation = 8.dp) {
         NavigationBarItem(selected = false, onClick = onDashboardClick, icon = { Text("⊞", fontSize = 22.sp) }, label = { Text("DASHBOARD", fontSize = 9.sp) })
-        NavigationBarItem(selected = false, onClick = onTemperatureClick, icon = { Text("🌡", fontSize = 22.sp) }, label = { Text("TEMPERATURE", fontSize = 9.sp) })
-        NavigationBarItem(selected = true, onClick = {}, icon = { Text("💧", fontSize = 22.sp) }, label = { Text("HUMIDITY", fontSize = 9.sp, color = PrimaryBlue, fontWeight = FontWeight.Bold) })
+        NavigationBarItem(selected = false, onClick = onTemperatureClick, icon = { Text("🌡", fontSize = 22.sp) }, label = { Text("TEMPERATURA", fontSize = 9.sp) })
+        NavigationBarItem(selected = true, onClick = {}, icon = { Text("💧", fontSize = 22.sp) }, label = { Text("HUMEDAD", fontSize = 9.sp, color = PrimaryBlue, fontWeight = FontWeight.Bold) })
     }
 }
 

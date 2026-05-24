@@ -24,7 +24,7 @@ interface AeroStatApiService {
 
     @GET("sensors/s1/history")
     suspend fun getHistory(
-        @Query("limit") limite: Int = 20, // Cambiado 'limite' a 'limit' para coincidir con tu backend de FastAPI
+        @Query("limit") limite: Int = 20,
         @Header("Authorization") token: String
     ): List<HistoryPoint>
 }
