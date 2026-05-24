@@ -72,4 +72,42 @@ class AeroStatViewModel : ViewModel() {
             }
         }
     }
+    fun registerUser(
+        username: String,
+        password: String,
+        onSuccessNavigate: () -> Unit
+    ) {
+
+        viewModelScope.launch {
+
+            _authState.value = AuthState.Loading
+
+            try {
+
+                val response =
+                    api.register(username, password)
+
+                if(response.isSuccessful){
+
+                    _authState.value = AuthState.Success
+
+                    onSuccessNavigate()
+
+                } else {
+
+                    _authState.value = AuthState.Error(
+                        response.errorBody()?.string()
+                            ?: "Error al registrar usuario"
+                    )
+                }
+
+            } catch (e: Exception){
+
+                _authState.value = AuthState.Error(
+                    e.localizedMessage
+                        ?: "Error de conexión"
+                )
+            }
+        }
+    }
 }

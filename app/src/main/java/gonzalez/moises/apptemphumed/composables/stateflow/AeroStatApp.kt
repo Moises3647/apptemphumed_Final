@@ -39,6 +39,7 @@ fun AeroStatTheme(content: @Composable () -> Unit) {
 
 object Routes {
     const val LOGIN       = "login"
+    const val REGISTER    = "register" // 1. Nueva ruta para el Registro
     const val DASHBOARD   = "dashboard"
     const val TEMPERATURE = "temperature"
     const val HUMIDITY    = "humidity"
@@ -63,6 +64,28 @@ fun AeroStatApp(viewModel: AeroStatViewModel = androidx.lifecycle.viewmodel.comp
                                 popUpTo(Routes.LOGIN) { inclusive = true }
                             }
                         }
+                    },
+                    // 2. Aquí le pasas la acción para ir a registrarse (ajusta el nombre del parámetro si en tu Login es diferente)
+                    onNavigateToRegister = {
+                        navController.navigate(Routes.REGISTER)
+                    }
+                )
+            }
+
+            // 3. Agregamos el composable para la pantalla de Registro
+            composable(Routes.REGISTER) {
+                RegisterScreen(
+                    viewModel = viewModel,
+                    onSuccessNavigate = {
+                        // Al registrarse con éxito, lo mandamos al Login de vuelta.
+                        // Usamos popUpTo para limpiar la pantalla de registro de la pila.
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(Routes.REGISTER) { inclusive = true }
+                        }
+                    },
+                    onBackToLogin = {
+                        // Si pulsa "¿Ya tienes cuenta? Iniciar sesión", simplemente volvemos atrás
+                        navController.popBackStack()
                     }
                 )
             }

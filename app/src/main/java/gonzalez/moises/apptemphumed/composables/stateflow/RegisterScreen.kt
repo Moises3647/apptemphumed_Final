@@ -27,6 +27,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import gonzalez.moises.apptemphumed.ui.viewmodels.AeroStatViewModel
+import gonzalez.moises.apptemphumed.ui.viewmodels.AuthState
 
 private val PrimaryBlue = Color(0xFF1A6EDB)
 private val BackgroundTop = Color(0xFFDEEDFF)
@@ -35,18 +37,87 @@ private val CardBg = Color(0xFFFFFFFF)
 private val TextPrimary = Color(0xFF0D1B3E)
 private val TextSecondary = Color(0xFF8A9BB8)
 private val DividerColor = Color(0xFFE0E8F5)
+private val SuccessGreen = Color(0xFF2E7D32) // Verde para el éxito
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onRegisterClick: (String, String) -> Unit = { _, _ -> },
-    onBackToLogin: () -> Unit = {}
+    viewModel: AeroStatViewModel,
+    onSuccessNavigate: () -> Unit,
+    onBackToLogin: () -> Unit
 ) {
-
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
     var passwordVisible by remember { mutableStateOf(false) }
+
+    // Estados para controlar los Pop-Ups
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    val authState by viewModel.authState.collectAsState()
+
+    // Escuchamos los cambios en el AuthState del ViewModel
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Error -> {
+                errorMessage = (authState as AuthState.Error).message
+                showErrorDialog = true
+            }
+            is AuthState.Success -> {
+                showSuccessDialog = true
+            }
+            else -> {}
+        }
+    }
+
+    // 1. POP-UP DE ERROR
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("Entendido", color = PrimaryBlue, fontWeight = FontWeight.Bold)
+                }
+            },
+            title = {
+                Text("Error de Registro", fontWeight = FontWeight.Bold, color = TextPrimary)
+            },
+            text = {
+                Text(errorMessage, color = Color(0xFF5C6B8B))
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = CardBg
+        )
+    }
+
+    // 2. POP-UP DE ÉXITO
+    if (showSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showSuccessDialog = false
+                onSuccessNavigate() // Navega si cierran el diálogo tocando fuera
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showSuccessDialog = false
+                        onSuccessNavigate() // Navega al confirmar
+                    }
+                ) {
+                    Text("Aceptar", color = SuccessGreen, fontWeight = FontWeight.Bold)
+                }
+            },
+            title = {
+                Text("¡Registro Exitoso!", fontWeight = FontWeight.Bold, color = SuccessGreen)
+            },
+            text = {
+                Text("El usuario se ha creado correctamente en el servidor de AeroStat.", color = Color(0xFF5C6B8B))
+            },
+            shape = RoundedCornerShape(16.dp),
+            containerColor = CardBg
+        )
+    }
 
     Box(
         modifier = Modifier
@@ -57,14 +128,12 @@ fun RegisterScreen(
                 )
             )
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             Spacer(modifier = Modifier.height(60.dp))
 
             Box(
@@ -106,16 +175,13 @@ fun RegisterScreen(
                 colors = CardDefaults.cardColors(containerColor = CardBg),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-
                         Text(
                             "Nombre de Usuario",
                             fontSize = 13.sp,
@@ -126,6 +192,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = username,
                             onValueChange = { username = it },
+                            enabled = authState !is AuthState.Loading,
                             placeholder = {
                                 Text(
                                     "Ingresa un usuario",
@@ -153,7 +220,6 @@ fun RegisterScreen(
                     }
 
                     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-
                         Text(
                             "Contraseña",
                             fontSize = 13.sp,
@@ -164,6 +230,7 @@ fun RegisterScreen(
                         OutlinedTextField(
                             value = password,
                             onValueChange = { password = it },
+                            enabled = authState !is AuthState.Loading,
                             leadingIcon = {
                                 Icon(
                                     Icons.Default.Lock,
@@ -176,31 +243,17 @@ fun RegisterScreen(
                                     passwordVisible = !passwordVisible
                                 }) {
                                     Icon(
-                                        if (passwordVisible)
-                                            Icons.Default.VisibilityOff
-                                        else
-                                            Icons.Default.Visibility,
+                                        if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                         contentDescription = null,
                                         tint = TextSecondary
                                     )
                                 }
                             },
-                            visualTransformation =
-                                if (passwordVisible)
-                                    VisualTransformation.None
-                                else
-                                    PasswordVisualTransformation(),
-
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Password
-                            ),
-
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                             modifier = Modifier.fillMaxWidth(),
-
                             shape = RoundedCornerShape(12.dp),
-
                             singleLine = true,
-
                             colors = OutlinedTextFieldDefaults.colors(
                                 unfocusedBorderColor = DividerColor,
                                 focusedBorderColor = PrimaryBlue,
@@ -212,8 +265,11 @@ fun RegisterScreen(
 
                     Button(
                         onClick = {
-                            onRegisterClick(username, password)
+                            // Pasamos un bloque vacío corporativo porque ahora manejamos la navegación
+                            // de éxito directamente tras presionar "Aceptar" en el pop-up de confirmación.
+                            viewModel.registerUser(username, password, {})
                         },
+                        enabled = authState !is AuthState.Loading && username.isNotBlank() && password.isNotBlank(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -222,20 +278,26 @@ fun RegisterScreen(
                             containerColor = PrimaryBlue
                         )
                     ) {
-
-                        Text(
-                            "Crear Usuario",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
+                        if (authState is AuthState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                "Crear Usuario",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
+                        }
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-
                         Text(
                             "¿Ya tienes cuenta?",
                             color = TextSecondary
@@ -247,7 +309,7 @@ fun RegisterScreen(
                             text = "Iniciar sesión",
                             color = PrimaryBlue,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.clickable {
+                            modifier = Modifier.clickable(enabled = authState !is AuthState.Loading) {
                                 onBackToLogin()
                             }
                         )
@@ -256,10 +318,4 @@ fun RegisterScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RegisterPreview() {
-    RegisterScreen()
 }

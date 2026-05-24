@@ -1,6 +1,7 @@
 package gonzalez.moises.apptemphumed.data.network
 
 import gonzalez.moises.apptemphumed.data.models.*
+import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
@@ -16,7 +17,12 @@ interface AeroStatApiService {
         @Field("username") username: String,
         @Field("password") password: String
     ): LoginResponse
-
+    @POST("users/register")
+    @FormUrlEncoded
+    suspend fun register(
+        @Field("username") username: String,
+        @Field("password") password: String
+    ): Response<RegisterResponse>
     @GET("sensors/s1/latest")
     suspend fun getLatestData(
         @Header("Authorization") token: String

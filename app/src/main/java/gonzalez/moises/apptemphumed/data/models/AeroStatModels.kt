@@ -22,3 +22,7 @@ data class HistoryPoint(
     val foto_path: String,
     val timestamp: String
 )
+
+data class RegisterResponse(
+    val mensaje: String
+)

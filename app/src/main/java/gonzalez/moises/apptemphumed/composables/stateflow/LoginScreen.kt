@@ -43,6 +43,7 @@ private val DividerColor  = Color(0xFFE0E8F5)
 fun LoginScreen(
     authState: AuthState,
     onLoginClick: (username: String, password: String) -> Unit = { _, _ -> },
+    onNavigateToRegister: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -193,13 +194,18 @@ fun LoginScreen(
                             ),
                             singleLine = true
                         )
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End // Lo alinea a la derecha
+                        ) {
                             Text(
-                                text = "Forgot password?",
-                                color = PrimaryBlue,
+                                text = "Crear nuevo usuario", // Cambiamos el texto de Forgot Password
+                                color = Color(0xFF1A6EDB), // El azul primario de tu App (PrimaryBlue)
                                 fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.clickable { }
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.clickable {
+                                    onNavigateToRegister() // <-- Llama a la navegación que agregamos al NavHost
+                                }
                             )
                         }
                     }
@@ -227,8 +233,3 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true, widthDp = 375, heightDp = 780)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen(authState = AuthState.Idle)
-}
