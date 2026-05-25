@@ -1,14 +1,14 @@
 # AeroStat - Monitoreo de Temperatura y Humedad
 
-AeroStat es una aplicación Android moderna diseñada para el monitoreo en tiempo real de condiciones ambientales (temperatura y humedad). La aplicación consume una API REST para mostrar datos actuales, análisis de variaciones y un historial detallado de mediciones.
+AeroStat es una aplicación Android moderna diseñada para el monitoreo periódico de condiciones ambientales (temperatura y humedad). La aplicación consume una API REST para mostrar las mediciones registradas cada hora, permitiendo un análisis de variaciones y un historial detallado.
 
 ## 🚀 Características
 
-- **Dashboard Principal**: Visualización rápida del estado actual del sensor.
+- **Dashboard Principal**: Visualización del último estado registrado por el sensor (actualizado cada hora).
 - **Detalle de Temperatura**: Gráficos o listas con la evolución de la temperatura y mensajes de análisis.
 - **Detalle de Humedad**: Seguimiento específico de los niveles de humedad.
-- **Historial**: Consulta de las últimas mediciones registradas por el sensor.
-- **Análisis Inteligente**: Mensajes informativos sobre las variaciones detectadas.
+- **Historial**: Consulta de las últimas mediciones registradas por el sensor para un seguimiento histórico.
+- **Análisis Inteligente**: Mensajes informativos sobre las variaciones detectadas entre cada registro.
 
 ## 🛠️ Stack Tecnológico
 
@@ -17,7 +17,6 @@ AeroStat es una aplicación Android moderna diseñada para el monitoreo en tiemp
 - **Arquitectura**: MVVM (Model-View-ViewModel)
 - **Networking**: [Retrofit 2](https://square.github.io/retrofit/) & Gson
 - **Navegación**: Navigation Compose
-- **Inyección de Dependencias**: (Si usas Hilt/Koin, puedes agregarlo aquí)
 - **Componentes**: Material Design 3
 
 ## 📦 Instalación y Configuración
